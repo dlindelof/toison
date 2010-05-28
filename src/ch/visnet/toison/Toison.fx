@@ -66,7 +66,7 @@ var clock : Timeline = Timeline {
 	repeatCount: Timeline.INDEFINITE
 	keyFrames:
             KeyFrame {
-                time: 7ms
+                time: 47ms
                 action: function () {
                     computeTime();
                     updateClock(elapsedMillis);
@@ -79,12 +79,15 @@ clock.play();
 
 Stage {
     title: "Toison"
+    fullScreen: true
     scene: Scene {
-        width: 250
-        height: 80
+        width: 1024
+        height: 600
         fill: Color.BLACK
         content: Flow {
             hgap: 8
+            layoutX: 512
+            layoutY: 300
             content: [ImageView {image: bind currImgs[0] },
                 ImageView {image: bind currImgs[1] },
                 ImageView {image: bind currImgs[6] }, // LED dots
