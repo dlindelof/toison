@@ -29,38 +29,47 @@ var PAUSED: Integer = 2;
 var UNTIMING: Integer = 3;
 var state: Integer = STOPPED;
 
-var sdf = new SimpleDateFormat("mmssSS");
+var sdf = new SimpleDateFormat("mmssSSS");
+
+var elapsedMillis = 0;
+var clockMillis = 0;
 
 
-
-def images: Image[] = for(i in [0..10]){Image {url: "{__DIR__}{i}.png"};}
+def images: Image[] = for(i in [0..11]){Image {url: "{__DIR__}{i}.png"};}
 
 var currImgs: Image[];
-updateClock(0s);
-insert images[10] into currImgs;
+updateClock(0);
+currImgs[6] = images[10];
+currImgs[7] = images[11];
 
 
-function updateClock(duration: Duration) {
-    println(duration.toMillis());
-    def mmssSS = sdf.format(duration.toMillis());
-    println(mmssSS);
+function updateClock(millis: Integer) {
+    def mmssSSS = sdf.format(millis);
     // Finally, map strings to images
-    currImgs[0] = images[Integer.parseInt(mmssSS.substring(0, 1))];
-    currImgs[1] = images[Integer.parseInt(mmssSS.substring(1, 2))];
-    currImgs[2] = images[Integer.parseInt(mmssSS.substring(2, 3))];
-    currImgs[3] = images[Integer.parseInt(mmssSS.substring(3, 4))];
-    currImgs[4] = images[Integer.parseInt(mmssSS.substring(4, 5))];
-    currImgs[5] = images[Integer.parseInt(mmssSS.substring(5))];
+    currImgs[0] = images[Integer.parseInt(mmssSSS.substring(0, 1))];
+    currImgs[1] = images[Integer.parseInt(mmssSSS.substring(1, 2))];
+    currImgs[2] = images[Integer.parseInt(mmssSSS.substring(2, 3))];
+    currImgs[3] = images[Integer.parseInt(mmssSSS.substring(3, 4))];
+    currImgs[4] = images[Integer.parseInt(mmssSSS.substring(4, 5))];
+    currImgs[5] = images[Integer.parseInt(mmssSSS.substring(5, 6))];
 }
+
+function computeTime() {
+    if (clockMillis == 0) clockMillis = System.currentTimeMillis();
+    var now = System.currentTimeMillis();
+    elapsedMillis = now - clockMillis;
+}
+
 
 var duration : Duration;
 var clock : Timeline = Timeline {
 	repeatCount: Timeline.INDEFINITE
 	keyFrames:
             KeyFrame {
-                time: 0.5s
+                time: 7ms
                 action: function () {
-                    updateClock(clock.totalDuration);
+                    computeTime();
+                    updateClock(elapsedMillis);
                     //displayContent = durationToString(clock.totalDuration)
                 }
             }
@@ -81,7 +90,7 @@ Stage {
                 ImageView {image: bind currImgs[6] }, // LED dots
                 ImageView {image: bind currImgs[2] },
                 ImageView {image: bind currImgs[3] },
-                ImageView {image: bind currImgs[6] }, // LED dots
+                ImageView {image: bind currImgs[7] }, // LED period
                 ImageView {image: bind currImgs[4] },
                 ImageView {image: bind currImgs[5] }]
         }
