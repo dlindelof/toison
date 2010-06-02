@@ -2,15 +2,9 @@ package ch.visnet.toison;
 
 import javafx.stage.Stage;
 import javafx.scene.Scene;
-import javafx.scene.text.Text;
-import javafx.scene.text.Font;
 import javafx.animation.Timeline;
 import javafx.animation.KeyFrame;
-import javafx.util.Math;
-import javafx.animation.Interpolator;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import javafx.scene.input.KeyEvent;
 import java.lang.System;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.shape.Rectangle;
@@ -18,8 +12,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.layout.Flow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.date.DateTime;
 import javafx.scene.input.MouseButton;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 
 /**
  * @author dlindelof
@@ -29,6 +24,8 @@ var TIMING: Integer = 1;
 var PAUSED: Integer = 2;
 var UNTIMING: Integer = 3;
 var state: Integer = STOPPED;
+
+var moreThan10sec = false;
 
 var sdf = new SimpleDateFormat("mmssSSS");
 
@@ -80,8 +77,21 @@ function computeDisplayTime() : Integer {
     return result;
 }
 
+def countDownDuration = 10350;
+function lessThanCountDownDuration(duration: Integer) { return duration < countDownDuration; }
 
-var duration : Duration;
+def countDownFile = Media {
+    //source: "file:CountDownFrom10.mp3"
+    source: "file:/home/dlindelof/projects/Toison/CountDownFrom10.mp3"
+    //source: "{__DIR__}CountDownFrom10.MP3"
+}
+
+def countDown = MediaPlayer {
+    media: countDownFile
+    //autoPlay: false
+}
+
+
 var clock : Timeline = Timeline {
 	repeatCount: Timeline.INDEFINITE
 	keyFrames:
@@ -90,6 +100,15 @@ var clock : Timeline = Timeline {
                 action: function () {
                     displayMillis = computeDisplayTime();
                     updateClock(displayMillis);
+                    if (state == UNTIMING) {
+                        if (moreThan10sec and lessThanCountDownDuration(displayMillis)) {
+                            moreThan10sec = false;
+                            countDown.play();
+                        } else if (not (lessThanCountDownDuration(displayMillis) or moreThan10sec)) {
+                            moreThan10sec = true;
+                            countDown.stop();
+                        }
+                    }
                 }
             }
         };
@@ -107,6 +126,7 @@ Stage {
                     if (e.button == MouseButton.SECONDARY) {
                         state = STOPPED;
                         clock.stop();
+                        countDown.stop();
                         resetClock();
                         return
                     }
@@ -118,6 +138,7 @@ Stage {
                         clock.play();
                     } else if (state == TIMING) {
                         timedMillis = displayMillis;
+                        if (timedMillis > 10000) moreThan10sec = true;
                         println(timedMillis);
                         state = UNTIMING;
                     }
