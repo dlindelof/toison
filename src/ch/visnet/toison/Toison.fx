@@ -15,6 +15,8 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import javafx.scene.text.Text;
+import javafx.scene.text.Font;
 
 /**
  * @author dlindelof
@@ -28,11 +30,24 @@ var state: Integer = STOPPED;
 var moreThan10sec = false;
 
 var sdf = new SimpleDateFormat("mmssSSS");
+var smallFormat = new SimpleDateFormat("mm:ss:SS");
 
 var timedMillis: Long = 0;
+var timedString = bind smallFormat.format(timedMillis);
 var displayMillis: Long = 0;
 var lastKeyMillis: Long = 0;
 
+var smallTimed = Text {
+    x: 100
+    y: 500
+    content: bind timedString
+    fill: Color.RED
+    font : Font {
+        size: 40
+    }
+
+    visible: false
+}
 
 def images: Image[] = for (i in [0..11]) {
             Image {
@@ -88,7 +103,6 @@ def countDownFile = Media {
 
 def countDown = MediaPlayer {
     media: countDownFile
-    //autoPlay: false
 }
 
 
@@ -125,23 +139,37 @@ Stage {
                 onMouseReleased: function (e: MouseEvent) {
                     if (e.button == MouseButton.SECONDARY) {
                         state = STOPPED;
+                        smallTimed.visible = false;
                         clock.stop();
                         countDown.stop();
                         resetClock();
                         return
                     }
-
-                    lastKeyMillis = System.currentTimeMillis();
+                    var now = System.currentTimeMillis();
+                    var sinceLastKeyMillis = now - lastKeyMillis;
+                    lastKeyMillis = now;
 
                     if (state == STOPPED) {
                         state = TIMING;
                         clock.play();
                     } else if (state == TIMING) {
                         timedMillis = displayMillis;
+                        smallTimed.visible = true;
                         if (timedMillis > 10000) moreThan10sec = true;
                         println(timedMillis);
                         state = UNTIMING;
+                    } else if (state == UNTIMING and sinceLastKeyMillis < 5000) {
+                            state = PAUSED;
+                            clock.pause();
+                            countDown.stop();
+                            updateClock(timedMillis);
+                    } else if (state == PAUSED) {
+                        state = UNTIMING;
+                        clock.play();
                     }
+
+
+
                 }
             },
             Flow {
@@ -157,6 +185,6 @@ Stage {
                     ImageView {image: bind currImgs[7] }, // LED period
                     ImageView {image: bind currImgs[4] },
                     ImageView {image: bind currImgs[5] }]
-            }]
+            }, smallTimed]
         }
     }
