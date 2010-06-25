@@ -92,7 +92,7 @@ function computeDisplayTime() : Integer {
     return result;
 }
 
-def countDownDuration = 10350;
+def countDownDuration = 10500;
 function lessThanCountDownDuration(duration: Integer) { return duration < countDownDuration; }
 
 def countDownFile = Media {
