@@ -17,6 +17,7 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.text.Text;
 import javafx.scene.text.Font;
+import java.lang.Math;
 
 /**
  * @author dlindelof
@@ -30,7 +31,8 @@ var state: Integer = STOPPED;
 var moreThan10sec = false;
 
 var sdf = new SimpleDateFormat("mmssSSS");
-var smallFormat = new SimpleDateFormat("mm:ss:SS");
+var smallFormat = new SimpleDateFormat("mm:ss.SSS");
+var deltaFormat = new SimpleDateFormat("ss.SSS");
 
 var timedMillis: Long = 0;
 var timedString = bind smallFormat.format(timedMillis);
@@ -39,15 +41,41 @@ var lastKeyMillis: Long = 0;
 
 var smallTimed = Text {
     x: 100
-    y: 500
+    y: 400
     content: bind timedString
     fill: Color.RED
     font : Font {
         size: 40
+        name: "Courier"
     }
 
     visible: false
 }
+
+var currentLap = 0;
+var currentDeltaBox = 0;
+def deltas: Text[] = for (i in [0..2]) {
+    Text {
+        x: 400 + i * 180
+        y: 400
+        content: ""
+        fill: Color.GREEN
+        font: Font {
+            size: 30
+            name: "Courier"
+        }
+    }
+}
+
+function addDelta(delta: Long) {
+    if (currentLap++ == 5) {
+        currentLap = 1;
+        currentDeltaBox++;
+    }
+    def sign = if (delta < 0) "-" else "+";
+    deltas[currentDeltaBox].content += "{sign}{deltaFormat.format(Math.abs(delta))}\n"
+}
+
 
 def images: Image[] = for (i in [0..11]) {
             Image {
@@ -140,6 +168,7 @@ Stage {
                     if (e.button == MouseButton.SECONDARY) {
                         state = STOPPED;
                         smallTimed.visible = false;
+                        for (i in [0..2]) { deltas[i].content = "" }
                         clock.stop();
                         countDown.stop();
                         resetClock();
@@ -166,7 +195,10 @@ Stage {
                     } else if (state == PAUSED) {
                         state = UNTIMING;
                         clock.play();
+                    } else {
+                        addDelta(sinceLastKeyMillis - timedMillis)
                     }
+
 
 
 
@@ -185,6 +217,8 @@ Stage {
                     ImageView {image: bind currImgs[7] }, // LED period
                     ImageView {image: bind currImgs[4] },
                     ImageView {image: bind currImgs[5] }]
-            }, smallTimed]
+            },
+            smallTimed,
+            deltas]
         }
     }
