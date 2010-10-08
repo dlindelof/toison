@@ -19,9 +19,6 @@ import javafx.scene.text.Text;
 import javafx.scene.text.Font;
 import java.lang.Math;
 
-/**
- * @author dlindelof
- */
 var STOPPED: Integer = 0;
 var TIMING: Integer = 1;
 var PAUSED: Integer = 2;
@@ -120,13 +117,13 @@ function computeDisplayTime() : Integer {
     return result;
 }
 
-def countDownDuration = 10500;
+def countDownDuration = 10700;
 function lessThanCountDownDuration(duration: Integer) { return duration < countDownDuration; }
 
 def countDownFile = Media {
     //source: "file:CountDownFrom10.mp3"
-    source: "file:/home/dlindelof/projects/Toison/CountDownFrom10.mp3"
-    //source: "{__DIR__}CountDownFrom10.MP3"
+//    source: "file:/home/dlindelof/projects/Toison/CountDownFrom10.mp3"
+    source: "{__DIR__}CountDownFrom10.MP3"
 }
 
 def countDown = MediaPlayer {
@@ -168,6 +165,8 @@ Stage {
                     if (e.button == MouseButton.SECONDARY) {
                         state = STOPPED;
                         smallTimed.visible = false;
+                        currentLap = 0;
+                        currentDeltaBox = 0;
                         for (i in [0..2]) { deltas[i].content = "" }
                         clock.stop();
                         countDown.stop();
