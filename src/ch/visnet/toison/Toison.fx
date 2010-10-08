@@ -117,13 +117,13 @@ function computeDisplayTime() : Integer {
     return result;
 }
 
-def countDownDuration = 10700;
+def countDownDuration = 11000; // make 'o' of 'zero' coincide with countdown 0
 function lessThanCountDownDuration(duration: Integer) { return duration < countDownDuration; }
 
 def countDownFile = Media {
     //source: "file:CountDownFrom10.mp3"
-//    source: "file:/home/dlindelof/projects/Toison/CountDownFrom10.mp3"
-    source: "{__DIR__}CountDownFrom10.MP3"
+    source: "file:/home/dlindelof/projects/Toison/CountDownFrom10.mp3"
+//    source: "{__DIR__}CountDownFrom10.MP3"
 }
 
 def countDown = MediaPlayer {
